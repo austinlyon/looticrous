@@ -23,7 +23,7 @@ export default class Ball {
 
   update(dt) {
     this.previousPosition.x = this.position.x;
-    this.previousposition.y = this.position.y;
+    this.previousPosition.y = this.position.y;
     this.position.x += this.speed.x/dt;
     this.position.y += this.speed.y/dt;
 

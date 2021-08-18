@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import Game from './../classes/game.js';
 import demonBall from './../assets/images/demonBall.png';
 
@@ -7,10 +7,9 @@ export default function GameCanvas() {
   const CANVAS_WIDTH = 1000;
   const CANVAS_HEIGHT = 700;
 
-  // Canvas references
+  // Canvas, GameState, and Image references
   const canvasRef = useRef(null);
-
-  // Image references
+  const gameRunning = useRef(true);
   const ballImageRef = useRef(null);
 
   useEffect(() => {
@@ -32,6 +31,7 @@ export default function GameCanvas() {
 
     // Create game loop function
     let lastTime = 0;
+
     function gameLoop(timestamp) {
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -41,11 +41,14 @@ export default function GameCanvas() {
       game.update(dt);
       game.draw(ctx);
 
-      requestAnimationFrame(gameLoop);
+      if (gameRunning.current) requestAnimationFrame(gameLoop);
     }
     requestAnimationFrame(gameLoop);
+    return function cleanup() {
+      gameRunning.current = false;
+      game.inputHandler.unsubscribeToInputHandlers();
+    }
   }, []);
-
 
   return (
     <div className="game" id="game">

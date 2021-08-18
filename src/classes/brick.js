@@ -1,4 +1,4 @@
-import { detectCollision } from './collisionDetection.js';
+import { detectCollision, resolveCollision } from './collisionDetection.js';
 
 export default class Brick {
   constructor(game, position) {
@@ -11,7 +11,18 @@ export default class Brick {
 
   update(dt) {
     if (detectCollision(this.game.ball, this)) {
-      this.game.ball.speed.y = -this.game.ball.speed.y;
+      const direction = resolveCollision(this.game.ball, this);
+      if (direction === 'reflect x') {
+        this.game.ball.speed.x = -this.game.ball.speed.x;
+      }
+      else if (direction === 'reflect y') {
+        this.game.ball.speed.y = -this.game.ball.speed.y;
+      }
+      else {
+        console.log('something impossible happened!');
+      }
+
+      // this.game.ball.speed.y = -this.game.ball.speed.y;
       this.destroyed = true;
     }
   }

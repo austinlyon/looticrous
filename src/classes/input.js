@@ -1,6 +1,7 @@
 export default class InputHandler {
   constructor(game, paddle) {
-    document.addEventListener("keydown", e => {
+    this.handleKeydown = e => {
+      console.log('keydown: ' + e.keyCode);
       switch(e.keyCode) {
         default:
           break;
@@ -14,9 +15,9 @@ export default class InputHandler {
           game.togglePause();
           break;
       }
-    });
+    };
 
-    document.addEventListener("keyup", e => {
+    this.handleKeyup = e => {
       switch(e.keyCode) {
         default:
           break;
@@ -27,6 +28,16 @@ export default class InputHandler {
           if (paddle.speed > 0) paddle.stop();
           break;
       }
-    });
+    };
+  }
+
+  initializeInputHandlers() {
+    document.addEventListener("keydown", this.handleKeydown);
+    document.addEventListener("keyup",   this.handleKeyup);
+  }
+
+  unsubscribeToInputHandlers() {
+    document.removeEventListener('keydown', this.handleKeydown);
+    document.removeEventListener("keyup",   this.handleKeyup);
   }
 }

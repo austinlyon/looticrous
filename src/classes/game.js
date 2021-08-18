@@ -32,7 +32,8 @@ export default class Game {
     this.bricks = buildStage(this, stage1);
 
     this.gameObjects = [this.paddle, this.ball, ...this.bricks];
-    new InputHandler(this, this.paddle);
+    this.inputHandler = new InputHandler(this, this.paddle);
+    this.inputHandler.initializeInputHandlers();
   }
 
   update(dt) {
