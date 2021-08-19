@@ -1,8 +1,8 @@
-import { Particle, SingleParticle, Trail } from './particle.js';
+import Particle from './particle.js';
 import InputHandler from './input.js';
 
 export default class Demo {
-  constructor(demoWidth, demoHeight, canvasRef) {
+  constructor(demoWidth, demoHeight, canvasRef, options) {
     this.width = demoWidth;
     this.height = demoHeight;
     this.canvasRef = canvasRef;
@@ -11,31 +11,44 @@ export default class Demo {
       y: undefined,
     }
     this.particles = [];
-    this.trails = [];
+    this.burstNumber = options.number;
+    this.particleMinSize = options.sizeMin;
+    this.particleMaxSize = options.sizeMax;
   }
 
-  init() {
-    for (let i = 0; i < 100; i++) {
-      this.particles.push(new Particle(this));
+  clearCanvas(ctx, canvas, clearStyle) {
+    const alpha = (function() {
+      if (clearStyle === 'clearCanvas') return false;
+      else if (clearStyle === 'leaveTrails') return 0.98;
+      else if (clearStyle === 'paint') return 1;
+      return false;
+    })();
+    // console.log(clearStyle, alpha);
+
+    if (alpha) {
+      if (alpha === 1) return;
+      ctx.save();
+      ctx.globalCompositeOperation = 'copy';
+      ctx.globalAlpha = alpha;
+      // ctx.drawImage(canvas, 0, 0, this.width, this.height, 0, 0, this.width, this.height);
+      ctx.drawImage(canvas, 0, 0);
+      ctx.restore();
+    }
+
+    else {
+      ctx.clearRect(0, 0, this.width, this.height);
     }
   }
 
   particleBurst() {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < this.burstNumber; i++) {
       this.particles.push(new Particle(this));
     }
   }
 
-  trailBurst() {
-    for (let i = 0; i < 4; i++) {
-      this.trails.push(new Trail(this));
-    }
-  }
-
-  handleParticles(ctx) {
+  updateParticles(dt) {
     for (let i = 0; i < this.particles.length; i++) {
-      this.particles[i].update();
-      this.particles[i].draw(ctx);
+      this.particles[i].update(dt);
       if (this.particles[i].size < 0.2) {
         this.particles.splice(i, 1);
         i--;
@@ -43,32 +56,22 @@ export default class Demo {
     }
   }
 
-  handleTrails(ctx) {
-    for (let i = 0; i < this.trails.length; i++) {
-      this.trails[i].update();
-      this.trails[i].draw(ctx);
-      if (this.trails[i].particles.length === 0) {
-        this.trails.splice(i, 1);
-        i--;
-      }
+  drawParticles(ctx) {
+    for (let i = 0; i < this.particles.length; i++) {
+      this.particles[i].draw(ctx);
     }
   }
 
   start() {
     this.inputHandler = new InputHandler(this);
     this.inputHandler.initializeInputHandlers();
-
-    // this.init();
   }
 
   update(dt) {
-
+    this.updateParticles(dt)
   }
 
   draw(ctx) {
-    this.handleParticles(ctx);
-    this.handleTrails(ctx);
-    // ctx.fillStyle = 'white';
-    // ctx.fillRect(this.mouse.x, this.mouse.y, 200, 100);
+    this.drawParticles(ctx);
   }
 }
