@@ -2,60 +2,51 @@ import { useRef, useEffect, useState } from 'react';
 import Demo from './../classes/craziness/demo.js';
 
 export default function CrazinessCanvas(props) {
-  // props
+  // Constants
+  const MAX_FPS = 60;  // Set frame rate cap
+  const SIMULATION_RATE = 60;  // Updates game state X times per second
+  const TIMESTEP = 1000 / SIMULATION_RATE;  // time between updates, in ms
+  const MAX_UPDATES_BEFORE_PANIC = 240;
+
+  // Props
   const { options } = props;
 
-  // Canvas & AnimationState references
+  // References
   const canvasRef = useRef(null);
+  const demoRef = useRef(null);
   const animationRunning = useRef(true);
+  // const demo = useRef(new Demo(canvas.width, canvas.height, canvas, options));
 
   // State
   const [FPS, setFPS] = useState(60);
-  const [canvasDimensions, setCanvasDimensions] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
+  const [particlesTracked, setParticlesTracked] = useState(0)
 
   useEffect(() => {
     // Crab canvas reference
     const canvas = canvasRef.current;
-    canvas.width = canvasDimensions.width;
-    canvas.height = canvasDimensions.height;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     const ctx = canvas.getContext('2d');
 
     // Create and initialize demo
-    const demo = new Demo(canvas.width, canvas.height, canvas, options);
+    const demo = new Demo(canvas);  // DEBUG How do I initialize options here?
+    demoRef.current = demo;
     demo.start();
 
-    const handleResize = debounce(function handleResize() {
-      setCanvasDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-      // demo.width = window.innerWidth;
-      // demo.height = window.innerHeight;
-    }, 500);
-
-    window.addEventListener('resize', handleResize);
-
-    // Set frame rate cap and update speed
-    const maxFPS = 60;
-    const simulationRate = 60;  // updates game state X times per second
-    const timestep = 1000 / simulationRate;
-
-    // Create animation loop function
-    let lastTime = 0;  // in milliseconds
-    let dt = 0;  // in milliseconds
     // FPS check
     let fps = 60;
     let framesThisSecond = 0;
     let lastFpsUpdate = 0;
-    const random = Math.random();  // DEBUG
 
+    // const random = Math.random();  // DEBUG
+
+    // Create animation loop function
+    let lastTime = 0;  // in milliseconds
+    let dt = 0;  // in milliseconds
     function animationLoop(timestamp) {
       // Throttle frame rate to maxFPS
-      if (timestamp < lastTime + (1000 / maxFPS)) {
-        requestAnimationFrame(animationLoop);
+      if (timestamp < lastTime + (1000 / MAX_FPS)) {
+        requestAnimationFrame(animationLoop);  // TODO try returning on this line? Or not?
         return;
       }
 
@@ -68,21 +59,22 @@ export default function CrazinessCanvas(props) {
       }
       framesThisSecond++;
 
+      // Particles Tracked check
+      setParticlesTracked(demo.particles.length);
+
       // Update according to how many timesteps have elapsed
       dt += timestamp - lastTime;
       lastTime = timestamp;
       let numUpdates = 0;
-      while (dt >= timestep) {
-        demo.update(timestep / 1000);
-        dt -= timestep;
-        if (numUpdates >= 240) {
-          panic();
-          break;
-        }
+      while (dt >= TIMESTEP) {
+        demo.update(TIMESTEP / 1000);  // DEBUG Should this divide by 1000 be here?
+        dt -= TIMESTEP;
+        if (numUpdates >= MAX_UPDATES_BEFORE_PANIC) { panic(); break; }
       }
 
-      console.log(random);  // DEBUG
-      demo.clearCanvas(ctx, canvas, options.clear); // can include alpha value as third option
+      // Draw
+      // console.log(random);  // DEBUG
+      demo.clearCanvas(ctx, canvas); // can include alpha value as third option
       demo.draw(ctx);
 
       if (animationRunning.current) requestAnimationFrame(animationLoop);
@@ -91,37 +83,27 @@ export default function CrazinessCanvas(props) {
     requestAnimationFrame(animationLoop);
 
     // Discard updates if update times go out of control
-    function panic() {
-      dt = 0;
-      console.log('panic!');
-    }
+    function panic() { dt = 0; console.log('panic!'); }  // TODO Don't fully understand this...
 
     return function cleanup() {
       animationRunning.current = false;
       demo.inputHandler.unsubscribeToInputHandlers();
-      window.removeEventListener('resize', handleResize);
     }
-  }, [canvasDimensions.width, canvasDimensions.height, options]);
+  }, [TIMESTEP]);  // DEBUG Technically this should never change... it's a computed constant?
+  // DEBUG Differing from MAX_UPDATES_BEFORE_PANIC, which is set to a basic type (num)
+
+  useEffect(() => {
+    demoRef.current.updateOptions(options);
+  }, [options]);
 
   return (
     <div className="demo" id="demo">
       <div id="fpsCheck">FPS: {FPS}</div>
+      <div id='particlesTracked'>{particlesTracked} Particles</div>
       <canvas
-        className="crazinessCanvas"
         id="crazinessCanvas"
         ref={canvasRef}
       />
     </div>
   );
-}
-
-function debounce(fn, ms) {
-  let timer;
-  return () => {
-    clearTimeout(timer)
-    timer = setTimeout(() => {
-      timer = null;
-      fn.apply(this, arguments);
-    }, ms);
-  };
 }
