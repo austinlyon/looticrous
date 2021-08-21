@@ -190,7 +190,9 @@ export default function CrazinessControls(props) {
               />
             </div>
             <div id="cycleColors">
-              <div>Cycle Colors:</div>
+              <div id="cycleColorsLabel">
+                Cycle Colors:
+              </div>
               <Switch
                 checked = {options.cycleHue}
                 onChange = {handleParticleCycleHueSwitch}
@@ -198,7 +200,9 @@ export default function CrazinessControls(props) {
                 color = "primary"
                 size = "small"
               />
-              <div>Color Cycle Rate: {cycleRateDisabled ? 'Not Cycling' : options.cycleRate}</div>
+              <div id="cycleRateLabel">
+                Color Cycle Rate: {cycleRateDisabled ? 'Not Cycling' : options.cycleRate}
+              </div>
             </div>
             <div>
               <Slider

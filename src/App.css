@@ -123,14 +123,21 @@ nav ul li#ltc_logo {
   display: block;
   width: 300px;
 }
-.MuiSwitch-sizeSmall {
+#effectOpts .MuiSwitch-sizeSmall {
   height: 18px;
   padding: 4px 7px;
 }
-.MuiSwitch-sizeSmall .MuiSwitch-switchBase {
+#effectOpts .MuiSwitch-sizeSmall .MuiSwitch-switchBase {
   padding: 1px 4px;
 }
 #cycleColors {
   display: flex;
   flex-direction: row;
+}
+#cycleColorsLabel {
+  padding-right: 5px;
+}
+#cycleRateLabel {
+  flex-grow: 1;
+  text-align: right;
 }
