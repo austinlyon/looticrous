@@ -9,6 +9,7 @@ html, body, #root, .App {
 
 nav {
   background-color: black;
+  border-bottom: 3px solid #666;
 }
 nav ul {
   display: flex;
@@ -17,8 +18,11 @@ nav ul {
   margin: 0;
   padding: 0;
 }
-nav ul li{
+nav ul li {
   list-style: none;
+}
+nav ul li.selectedTab {
+  background: linear-gradient(0deg, rgba(53,0,0,1) 0%, rgba(0,0,0,0) 100%);
 }
 nav ul li a {
   display: flex;

@@ -1,6 +1,10 @@
 export default function NavItem(props) {
   return (
-    <div className='navItem'>
+    <div
+      id = {props.id}
+      className='navItem'
+      onClick =  {props.clickHandler}
+    >
       {props.text}
     </div>
   );
