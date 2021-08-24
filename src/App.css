@@ -54,14 +54,15 @@ nav ul li#ltc_logo {
 }
 .gameContainer {
   height: 100%;
-  padding: 50px;
+  padding: 50px 0;
   background-color: #666;
 }
 .demoContainer {
   height: 100%;
   width: 100%;
 }
-.game, .demo {
+.game,
+.collisionTest {
   width: 1000px;
   height: 700px;
   margin: 0 auto;
@@ -93,6 +94,21 @@ nav ul li#ltc_logo {
   padding: 5px;
   border-bottom-left-radius: 8px;
   user-select: none;
+}
+
+/* Collision Test */
+.collisionControls {
+  display: flex;
+  color: white;
+  background-color: #111111;
+
+}
+.collisionControls > div {
+  flex: 1;
+  padding: 20px;
+}
+.collisionInstructions p {
+  margin: 4px 0;
 }
 
 /* Canvas Craziness Controls */

@@ -24,10 +24,6 @@ export default function CanvasCraziness() {
 
   return (
     <div className="content">
-      <header className="App-header">
-        <h1>CaNvAs CrAzInEsS!</h1>
-      </header>
-
       <CrazinessControls
         options = {options}
         setOptions = {handleOptionsUpdate} />

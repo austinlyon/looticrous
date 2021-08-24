@@ -6,7 +6,7 @@ export default function CrazinessCanvas(props) {
   const MAX_FPS = 60;  // Set frame rate cap
   const SIMULATION_RATE = 60;  // Updates game state X times per second
   const TIMESTEP = 1000 / SIMULATION_RATE;  // time between updates, in ms
-  const MAX_UPDATES_BEFORE_PANIC = 240;
+  const MAX_UPDATES_BEFORE_PANIC = 30;
 
   // Props
   const { options } = props;
@@ -22,7 +22,7 @@ export default function CrazinessCanvas(props) {
   const [particlesTracked, setParticlesTracked] = useState(0)
 
   useEffect(() => {
-    // Crab canvas reference
+    // Grab canvas reference
     const canvas = canvasRef.current;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -67,14 +67,14 @@ export default function CrazinessCanvas(props) {
       lastTime = timestamp;
       let numUpdates = 0;
       while (dt >= TIMESTEP) {
-        demo.update(TIMESTEP / 1000);  // DEBUG Should this divide by 1000 be here?
+        demo.update(TIMESTEP / 1000);
         dt -= TIMESTEP;
-        if (numUpdates >= MAX_UPDATES_BEFORE_PANIC) { panic(); break; }
+        if (++numUpdates >= MAX_UPDATES_BEFORE_PANIC) { panic(); break; }
       }
 
       // Draw
       // console.log(random);  // DEBUG
-      demo.clearCanvas(ctx, canvas); // can include alpha value as third option
+      demo.clearCanvas(ctx, canvas);
       demo.draw(ctx);
 
       if (animationRunning.current) requestAnimationFrame(animationLoop);
@@ -82,8 +82,8 @@ export default function CrazinessCanvas(props) {
     animationRunning.current = true;
     requestAnimationFrame(animationLoop);
 
-    // Discard updates if update times go out of control
-    function panic() { dt = 0; console.log('panic!'); }  // TODO Don't fully understand this...
+    // Function to discard updates if update times go out of control
+    function panic() { dt = 0 }  // TODO Don't fully understand this...
 
     return function cleanup() {
       animationRunning.current = false;
