@@ -1,6 +1,6 @@
 import Paddle from './paddle.js';
 import Ball from './ball.js';
-import { buildStage, stage1, stage2, stage3 } from './stages.js';
+import { buildStage, stage1 } from './stages.js';
 import InputHandler from './input.js';
 
 const GAMESTATE = {
