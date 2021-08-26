@@ -1,7 +1,6 @@
 export default class InputHandler {
   constructor(game, paddle) {
     this.handleKeydown = e => {
-      console.log('keydown: ' + e.keyCode);
       switch(e.keyCode) {
         default:
           break;
@@ -13,6 +12,13 @@ export default class InputHandler {
           break;
         case 32:
           game.togglePause();
+          break;
+        case 70:
+          if (game.frameByFrameMode) game.getNextFrame(true);
+          break;
+        case 81:
+          game.frameByFrameMode = !game.frameByFrameMode;
+          if (!game.frameByFrameMode) game.getNextFrame(true);
           break;
       }
     };

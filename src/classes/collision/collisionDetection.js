@@ -61,7 +61,6 @@ export function detectCollision(collider, target) {
     return false;
   }
 
-
   const contactPoint = {
     x: P0.x + D.x * collision.hit.near,
     y: P0.y + D.y * collision.hit.near,

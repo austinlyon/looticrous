@@ -65,7 +65,12 @@ nav ul li#ltc_logo {
   height: 100%;
   width: 100%;
 }
-.game,
+.game {
+  width: 1280px;
+  height: 720px;
+  margin: 0 auto;
+  background-color: black;
+}
 .collisionTest {
   width: 1000px;
   height: 700px;

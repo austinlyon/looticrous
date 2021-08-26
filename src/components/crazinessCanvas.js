@@ -41,8 +41,8 @@ export default function CrazinessCanvas(props) {
     // const random = Math.random();  // DEBUG
 
     // Create animation loop function
-    let lastTime = 0;  // in milliseconds
-    let dt = 0;  // in milliseconds
+    let lastTime = window.performance.now();  // in milliseconds
+    let dt = 0;                               // in milliseconds
     function animationLoop(timestamp) {
       // Throttle frame rate to maxFPS
       if (timestamp < lastTime + (1000 / MAX_FPS)) {
@@ -67,6 +67,7 @@ export default function CrazinessCanvas(props) {
       lastTime = timestamp;
       let numUpdates = 0;
       while (dt >= TIMESTEP) {
+        // if (numUpdates > 0) console.log('Frame Drop!'); // DEBUG
         demo.update(TIMESTEP / 1000);
         dt -= TIMESTEP;
         if (++numUpdates >= MAX_UPDATES_BEFORE_PANIC) { panic(); break; }

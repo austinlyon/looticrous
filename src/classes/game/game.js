@@ -1,20 +1,27 @@
 import Paddle from './paddle.js';
 import Ball from './ball.js';
-import { buildStage, stage1 } from './stages.js';
+import { buildStage, stage1, stage2, stage3 } from './stages.js';
 import InputHandler from './input.js';
 
 const GAMESTATE = {
-  PAUSED: 0,
-  RUNNING: 1,
-  MENU: 2,
-  GAMEOVER: 3,
+  TITLE: 0,
+  CHARACTER_SELECT: 1,
+  STAGE_SELECT: 2,
+  PLAYING_STAGE: 3,
+  PAUSED: 7,
+  RUNNING: 8,
+  PAUSE_MENU: 4,
+  GAMEOVER: 5,
+  BEAT_STAGE: 6,
 };
 
 export default class Game {
-  constructor(gameWidth, gameHeight, images) {
-    this.width = gameWidth;
-    this.height = gameHeight;
+  constructor(width, height, images, getNextFrame) {
+    this.width = width;
+    this.height = height;
     this.images = images;
+    this.getNextFrame = getNextFrame;
+    this.frameByFrameMode = false;
   }
 
   togglePause() {
@@ -44,6 +51,8 @@ export default class Game {
   }
 
   draw(ctx) {
+    ctx.clearRect(0, 0, this.width, this.height);
+
     this.gameObjects.forEach(object => object.draw(ctx));
 
     if (this.gamestate === GAMESTATE.PAUSED) {
@@ -54,7 +63,9 @@ export default class Game {
       ctx.font = '60px Arial';
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
-      ctx.fillText("Paused", this.width/2, this.height /2);
+      ctx.fillText("Paused", this.width/2, this.height/2);
     }
+
+    if (this.frameByFrameMode) this.getNextFrame(false);
   }
 }
