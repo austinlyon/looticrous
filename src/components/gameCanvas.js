@@ -37,7 +37,7 @@ export default function GameCanvas() {
 
     // Create and initialize game
     const getNextFrame = (val) => { setNextFrame(val) };
-    const game = new Game(CANVAS_WIDTH, CANVAS_HEIGHT, images, getNextFrame);
+    const game = new Game(canvas, CANVAS_WIDTH, CANVAS_HEIGHT, images, getNextFrame);
     gameRef.current = game;
     game.start();
 
@@ -88,7 +88,7 @@ export default function GameCanvas() {
 
     return function cleanup() {
       gameRunning.current = false;
-      game.inputHandler.unsubscribeToInputHandlers();
+      game.inputHandler.unregisterAllInputHandlers();
     }
   }, [TIMESTEP]);
 

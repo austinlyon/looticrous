@@ -1,13 +1,17 @@
-import Paddle from './paddle.js';
-import Ball from './ball.js';
-import { buildStage, stage1 } from './stages.js';
+import TitleScene from './title/titleScene.js';
+import Pong from './pong/pongScene.js';
 import InputHandler from './input.js';
+
+// const SCENES = {
+//   TITLE: 0,
+//   PONG: 1,
+// }
 
 const GAMESTATE = {
   TITLE: 0,
   CHARACTER_SELECT: 1,
   STAGE_SELECT: 2,
-  PLAYING_STAGE: 3,
+  PONG: 3,
   PAUSED: 7,
   RUNNING: 8,
   PAUSE_MENU: 4,
@@ -16,56 +20,70 @@ const GAMESTATE = {
 };
 
 export default class Game {
-  constructor(width, height, images, getNextFrame) {
+  constructor(canvas, width, height, images, getNextFrame) {
+    this.canvas = canvas;
     this.width = width;
     this.height = height;
     this.images = images;
     this.getNextFrame = getNextFrame;
     this.frameByFrameMode = false;
+    this.gamestate = GAMESTATE.TITLE;
+    this.inputHandler = new InputHandler();
+
+    this.handleKeydown = this.handleKeydown.bind(this);
+    this.getNextFrame = this.getNextFrame.bind(this);
   }
 
-  togglePause() {
-    if (this.gamestate === GAMESTATE.RUNNING) {
-      this.gamestate = GAMESTATE.PAUSED;
-    } else {
-      this.gamestate = GAMESTATE.RUNNING;
+  handleKeydown(e) {
+    switch (e.keyCode) {
+      case 70:
+        if (this.frameByFrameMode) this.getNextFrame(true);
+        break;
+      case 81:
+        this.frameByFrameMode = !this.frameByFrameMode;
+        if (!this.frameByFrameMode) this.getNextFrame(true);
+        break;
+      default:
+        break;
     }
+  }
+
+  registerHandlers() {
+    const handlers = {
+      gameKeydown: {
+        input: 'keydown',
+        func: this.handleKeydown,
+      },
+    };
+    this.inputHandler.registerInputHandlers(handlers);
+  }
+
+  loadScene(scene) {
+    switch (scene) {
+      case 'title':
+        this.scene = new TitleScene(this);
+        break;
+      case 'pong':
+        this.scene = new Pong(this);
+        break;
+      default:
+        break;
+    }
+
+    this.scene.start();
   }
 
   start() {
-    this.gamestate = GAMESTATE.RUNNING;
-    this.paddle = new Paddle(this);
-    this.ball = new Ball(this);
-    this.bricks = buildStage(this, stage1);
-
-    this.gameObjects = [this.paddle, this.ball, ...this.bricks];
-    this.inputHandler = new InputHandler(this, this.paddle);
-    this.inputHandler.initializeInputHandlers();
+    this.registerHandlers();
+    this.loadScene('title');
   }
 
   update(dt) {
-    if (this.gamestate === GAMESTATE.PAUSED) return;
-
-    this.gameObjects.forEach(object => object.update(dt));
-    this.gameObjects = this.gameObjects.filter(object => !object.destroyed);
+    this.scene.update(dt);
   }
 
   draw(ctx) {
-    ctx.clearRect(0, 0, this.width, this.height);
-
-    this.gameObjects.forEach(object => object.draw(ctx));
-
-    if (this.gamestate === GAMESTATE.PAUSED) {
-      ctx.rect(0, 0, this.width, this.height);
-      ctx.fillStyle = 'rgba(0, 0, 0, .5)';
-      ctx.fill();
-
-      ctx.font = '60px Arial';
-      ctx.fillStyle = 'white';
-      ctx.textAlign = 'center';
-      ctx.fillText("Paused", this.width/2, this.height/2);
-    }
-
+    this.scene.draw(ctx);
     if (this.frameByFrameMode) this.getNextFrame(false);
   }
 }

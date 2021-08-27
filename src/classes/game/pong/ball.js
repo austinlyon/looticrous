@@ -3,7 +3,6 @@ import { detectCollision } from './collisionDetection.js';
 export default class Ball {
   constructor(game) {
     this.game = game;
-    this.image = game.images.ball;
     this.size = 15;
     this.prev = {
       x: 250,
@@ -26,12 +25,12 @@ export default class Ball {
     this.pos.y += this.speed.y * dt;
 
     // handle collision with left or right walls
-    if (this.pos.x > this.game.width - this.size || this.pos.x < 0) {
+    if (this.pos.x > this.game.width - this.size || this.pos.x < this.size) {
       this.speed.x = -this.speed.x;
     }
 
     // handle collision with top or bottom walls
-    if (this.pos.y > this.game.height - this.size || this.pos.y < 0) {
+    if (this.pos.y > this.game.height - this.size || this.pos.y < this.size) {
       this.speed.y = -this.speed.y;
     }
 
