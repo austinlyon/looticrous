@@ -43,6 +43,7 @@ export default class TitleScene {
   }
 
   exitTitleScreen() {
+    this.titleMusic.src = '';
     this.unregisterHandlers();
     this.game.loadScene('pong');
   }

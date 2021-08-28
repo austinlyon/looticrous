@@ -1,6 +1,7 @@
 import TitleScene from './title/titleScene.js';
 import Pong from './pong/pongScene.js';
 import InputHandler from './input.js';
+import titleSong from 'assets/music/Jim_Hall-Heartache.mp3';
 
 // const SCENES = {
 //   TITLE: 0,
@@ -28,6 +29,8 @@ export default class Game {
     this.getNextFrame = getNextFrame;
     this.frameByFrameMode = false;
     this.gamestate = GAMESTATE.TITLE;
+    this.music = new Audio();
+    this.music.src = titleSong;
     this.inputHandler = new InputHandler();
 
     this.handleKeydown = this.handleKeydown.bind(this);
@@ -61,6 +64,8 @@ export default class Game {
   loadScene(scene) {
     switch (scene) {
       case 'title':
+        this.music.volume = .5;
+        this.music.play();
         this.scene = new TitleScene(this);
         break;
       case 'pong':

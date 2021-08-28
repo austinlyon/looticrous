@@ -88,6 +88,7 @@ export default function GameCanvas() {
 
     return function cleanup() {
       gameRunning.current = false;
+      game.music.src = '';
       game.inputHandler.unregisterAllInputHandlers();
     }
   }, [TIMESTEP]);
