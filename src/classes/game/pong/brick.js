@@ -24,12 +24,11 @@ export default class Brick {
       y: collision.point.y + dist.y,
     };
 
-    // Update speed
+    // Update velocity
     if (collision.normal.x)
-      this.game.ball.speed.x = Math.abs(this.game.ball.speed.x) * collision.normal.x;
+      this.game.ball.velocity.x = Math.abs(this.game.ball.velocity.x) * collision.normal.x;
     if (collision.normal.y)
-      this.game.ball.speed.y = Math.abs(this.game.ball.speed.y) * collision.normal.y;
-
+      this.game.ball.velocity.y = Math.abs(this.game.ball.velocity.y) * collision.normal.y;
   }
 
   update(dt) {

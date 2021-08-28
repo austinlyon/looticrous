@@ -119,8 +119,8 @@ export function resolveCollision(ball, gameObject) {
     yBottom: gameObject.pos.y + gameObject.height + ball.size/2,
   }
 
-  const xCheck = ball.speed.x > 0 ? expandedObject.xLeft : expandedObject.xRight;
-  const yCheck = ball.speed.y > 0 ? expandedObject.yTop : expandedObject.yBottom;
+  const xCheck = ball.velocity.x > 0 ? expandedObject.xLeft : expandedObject.xRight;
+  const yCheck = ball.velocity.y > 0 ? expandedObject.yTop : expandedObject.yBottom;
   const xIntercept = {
     x: xCheck,
     y: (ballCenter.y - ballPreviousCenter.y)

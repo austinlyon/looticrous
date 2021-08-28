@@ -2,9 +2,13 @@ import Paddle from './paddle.js';
 import Ball from './ball.js';
 import { buildStage, stage1 } from './stages.js';
 
-const STATE = {
+const RUNSTATE = {
   PAUSED: 0,
   RUNNING: 1,
+}
+const GAMESTATE = {
+  LAUNCH: 0,
+  BOUNCE: 1,
 }
 
 export default class Pong {
@@ -12,7 +16,8 @@ export default class Pong {
     this.game = game;
     this.width = this.game.width;
     this.height = this.game.height;
-    this.state = STATE.RUNNING;
+    this.runState = RUNSTATE.RUNNING;
+    this.gameState = GAMESTATE.LAUNCH;
 
     this.handleKeydown = this.handleKeydown.bind(this);
     this.handleKeyup = this.handleKeyup.bind(this);
@@ -23,14 +28,19 @@ export default class Pong {
   // Input Handlers
   handleKeydown(e) {
     switch (e.keyCode) {
+      case 32:
+        e.preventDefault();
+        this.togglePause();
+        break;
       case 65:
         this.paddle.moveLeft();
         break;
       case 68:
         this.paddle.moveRight();
         break;
-      case 32:
-        this.togglePause();
+      case 75:
+        this.paddle.launch();
+        this.ball.launch();
         break;
       default:
         break;
@@ -70,24 +80,24 @@ export default class Pong {
   }
 
   togglePause() {
-    if (this.state === STATE.RUNNING) {
-      this.state = STATE.PAUSED;
+    if (this.runState === RUNSTATE.RUNNING) {
+      this.runState = RUNSTATE.PAUSED;
     } else {
-      this.state = STATE.RUNNING;
+      this.runState = RUNSTATE.RUNNING;
     }
   }
 
   start() {
-    this.paddle = new Paddle(this);
     this.ball = new Ball(this);
+    this.paddle = new Paddle(this);
     this.bricks = buildStage(this, stage1);
-    this.gameObjects = [this.paddle, this.ball, ...this.bricks];
+    this.gameObjects = [this.ball, this.paddle, ...this.bricks];
 
     this.registerHandlers();
   }
 
   update(dt) {
-    if (this.state === STATE.PAUSED) return;
+    if (this.runState === RUNSTATE.PAUSED) return;
 
     this.gameObjects.forEach(object => object.update(dt));
     this.gameObjects = this.gameObjects.filter(object => !object.destroyed);
@@ -98,7 +108,7 @@ export default class Pong {
 
     this.gameObjects.forEach(object => object.draw(ctx));
 
-    if (this.state === STATE.PAUSED) {
+    if (this.runState === RUNSTATE.PAUSED) {
       ctx.rect(0, 0, this.width, this.height);
       ctx.fillStyle = 'rgba(0, 0, 0, .5)';
       ctx.fill();
