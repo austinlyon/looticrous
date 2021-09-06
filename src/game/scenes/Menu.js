@@ -8,8 +8,7 @@ export default class Menu extends Phaser.Scene {
   preload() {
     // const flameImg = this.load.image('flame', 'images/flame.png');
     this.createMenuItemTexture();
-    const flameImg = this.load.image('flame', 'images/flame.png');
-    console.dir(flameImg);
+    this.load.image('flame', 'images/flame.png');
   }
 
   create() {
@@ -58,7 +57,7 @@ export default class Menu extends Phaser.Scene {
 
   createMenuItemTexture() {
     const g = this.add.graphics();
-    g.fillStyle(0x222222);
+    g.fillStyle(0x181818, 1);
     g.lineStyle(2, 0xdddddd)
     g.fillRoundedRect(0, 0, 64, 64);
     g.strokeRoundedRect(0, 0, 64, 64)

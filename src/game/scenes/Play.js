@@ -36,12 +36,16 @@ export default class Play extends Phaser.Scene {
 
   preload() {
     this.initializeBrickGraphics();
+    this.initializeFireballGraphics('fireTrail');
   }
 
   create() {
     // Create Pause scene
     this.scene.add('paused', Paused);
     this.scene.add('menu', Menu);
+
+    // Include Instructions Text
+    this.createInstructions();
 
     // Set bounds for the arena
     this.physics.world.setBounds(240, 40, 800, 680);
@@ -56,6 +60,20 @@ export default class Play extends Phaser.Scene {
     this.ball.state = BALL_STATE.ON_PADDLE;
     this.physics.add.collider(this.paddle, this.ball, this.handlePaddleCollision);
     this.createBricks();
+
+    // Create Particle Emitter
+    const fireTrail = this.add.particles('fireTrail');
+    fireTrail.createEmitter({
+      quantity: 1,
+      speedY: { min: 20, max: 50 },
+      speedX: { min: 20, max: 50 },
+      scale: { start: 1, end: 0.01 },
+      lifespan: { min: 100, max: 300 },
+      // alpha: { start: 1, end: 0.5 },
+      blendMode: 'ADD',
+      follow: this.ball,
+      // followOffset: { y: this.ball.height / 2 },
+    });
 
     // Create Controls
     this.paddleControls = {
@@ -119,10 +137,35 @@ export default class Play extends Phaser.Scene {
     ball.body.setVelocityX(10 * dist);
   }
 
+  initializeFireballGraphics(key) {
+    const g = this.add.graphics();
+    g.fillStyle(0xff0000);
+    g.fillCircle(15, 15, 15);
+    g.generateTexture(key, 30, 30);
+    g.destroy();
+  }
+
   initializeBrickGraphics() {
     for (const hue in HUES) {
       this.createBrickTexture(hue);
     }
+  }
+
+  createInstructions() {
+    const textStyle = {
+      fontSize: '32px',
+      color: '#fff',
+      align: 'center',
+    };
+
+    this.add.text(120, 100, 'Movement', textStyle).setOrigin(0.5);
+    this.add.text(120, 150, '<-A D->', textStyle).setOrigin(0.5);
+    this.add.text(120, 250, 'Launch', textStyle).setOrigin(0.5);
+    this.add.text(120, 300, 'K', textStyle).setOrigin(0.5);
+    this.add.text(120, 400, 'Powers', textStyle).setOrigin(0.5);
+    this.add.text(120, 450, 'J K', textStyle).setOrigin(0.5);
+    this.add.text(120, 550, 'Pause/Menu', textStyle).setOrigin(0.5);
+    this.add.text(120, 600, 'SPACE', textStyle).setOrigin(0.5);
   }
 
   createBrickTexture(hue) {
