@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import Game from './../classes/game/game.js';
 import demonBall from './../assets/images/demonBall.png';
 
-export default function GameCanvas() {
+export default function OldGameCanvas() {
   // Constants
   const MAX_FPS = 60;  // Set frame rate cap
   const SIMULATION_RATE = 60;  // Updates game state X times per second

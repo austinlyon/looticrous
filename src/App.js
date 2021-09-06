@@ -8,6 +8,7 @@ import {
 import NavItem from './components/navItem.js';
 import Home from './components/home.js';
 import RPongG from './components/r-pong-g.js';
+import OldPongG from './components/old-pong-g.js';
 import CollisionTest from './components/collisionTest.js';
 import CanvasCraziness from './components/canvasCraziness.js';
 import './App.css';
@@ -43,8 +44,16 @@ function App() {
             <li className = {selectedTab === 'rponggTab' ? 'selectedTab' : ''}>
               <Link to="/rpongg">
                 <NavItem
-                  text='R-Pong-G'
+                  text='RPonG'
                   id = 'rponggTab'
+                  clickHandler = {selectTab} />
+              </Link>
+            </li>
+            <li className = {selectedTab === 'oldponggTab' ? 'selectedTab' : ''}>
+              <Link to="/oldpongg">
+                <NavItem
+                  text='OldPonG'
+                  id = 'oldponggTab'
                   clickHandler = {selectTab} />
               </Link>
             </li>
@@ -70,6 +79,9 @@ function App() {
         <Switch>
           <Route path="/rpongg">
             <RPongG />
+          </Route>
+          <Route path="/oldpongg">
+            <OldPongG />
           </Route>
           <Route path="/collision">
             <CollisionTest />

@@ -48,6 +48,10 @@ nav ul li#ltc_logo {
   display: flex;
   flex-direction: column;
 }
+.phaserContent {
+  display: flex;
+  flex-direction: column;
+}
 .App-header {
   text-align: center;
   background-color: #999;
@@ -56,9 +60,14 @@ nav ul li#ltc_logo {
   margin: 0;
   padding: .67em;
 }
+.phaserContainer {
+  height: 100%;
+  padding: 15px;
+  background-color: #666;
+}
 .gameContainer {
   height: 100%;
-  padding: 15px 0;
+  padding: 15px;
   background-color: #666;
 }
 .demoContainer {
@@ -66,10 +75,20 @@ nav ul li#ltc_logo {
   width: 100%;
 }
 .game {
+  /* width: 1280px;
+  height: 720px; */
+  margin: 0 auto;
+  background-color: black;
+}
+.phaserGame {
   width: 1280px;
   height: 720px;
   margin: 0 auto;
   background-color: black;
+}
+.phaserGame canvas {
+  /* height: 100%;
+  width: 100%; */
 }
 .collisionTest {
   width: 1000px;
