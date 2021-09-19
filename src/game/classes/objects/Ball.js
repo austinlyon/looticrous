@@ -9,5 +9,7 @@ export default class Ball extends Phaser.GameObjects.Arc {
       .setCollideWorldBounds(true)
       .setBounce(1);
     this.scene = scene;
+    this.power = null;
+    this.cooldown = false;
   }
 }

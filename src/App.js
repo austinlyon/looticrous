@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import NavItem from './components/navItem.js';
 import Home from './components/home.js';
+import Tanks from './components/tanks.js';
 import RPongG from './components/r-pong-g.js';
 import OldPongG from './components/old-pong-g.js';
 import CollisionTest from './components/collisionTest.js';
@@ -38,6 +39,14 @@ function App() {
                 <NavItem
                   text = "Home"
                   id = 'homeTab'
+                  clickHandler = {selectTab} />
+              </Link>
+            </li>
+            <li className = {selectedTab === 'tanks' ? 'selectedTab' : ''}>
+              <Link to="/tanks">
+                <NavItem
+                  text='ADA Tanks'
+                  id = 'tanksTab'
                   clickHandler = {selectTab} />
               </Link>
             </li>
@@ -77,6 +86,9 @@ function App() {
         </nav>
 
         <Switch>
+          <Route path="/tanks">
+            <Tanks />
+          </Route>
           <Route path="/rpongg">
             <RPongG />
           </Route>

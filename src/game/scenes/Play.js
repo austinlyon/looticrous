@@ -26,7 +26,7 @@ const BALL_STATE = {
 const STATE = {
   PAUSED: 0,
   PLAYING: 1,
-}
+};
 
 export default class Play extends Phaser.Scene {
   constructor() {
@@ -36,6 +36,7 @@ export default class Play extends Phaser.Scene {
 
   preload() {
     this.initializeBrickGraphics();
+    this.initializeBallGraphics();
     this.initializeFireballGraphics('fireTrail');
   }
 
@@ -56,14 +57,16 @@ export default class Play extends Phaser.Scene {
     // Create GameObjects
     this.paddle = new Paddle(this, 640, 690, 100, 20, 0x6666ff);
     const ballYOffset = this.paddle.y - this.paddle.height/2 - 15;
-    this.ball = new Ball(this, 440, ballYOffset, 15, 0xff0000);
+    this.ball = new Ball(this, 440, ballYOffset, 15, 0xffffff);
     this.ball.state = BALL_STATE.ON_PADDLE;
     this.physics.add.collider(this.paddle, this.ball, this.handlePaddleCollision);
     this.createBricks();
 
     // Create Particle Emitter
-    const fireTrail = this.add.particles('fireTrail');
-    fireTrail.createEmitter({
+    // const ballDirection = new Phaser.Math.Vector2(0,0);
+    // ballDirection.setToPolar();
+    const particles = this.add.particles('fireTrail');
+    const fireTrail = particles.createEmitter({
       quantity: 1,
       speedY: { min: 20, max: 50 },
       speedX: { min: 20, max: 50 },
@@ -72,8 +75,10 @@ export default class Play extends Phaser.Scene {
       // alpha: { start: 1, end: 0.5 },
       blendMode: 'ADD',
       follow: this.ball,
+      on: false,
       // followOffset: { y: this.ball.height / 2 },
     });
+    this.ball.fireTrail = fireTrail;
 
     // Create Controls
     this.paddleControls = {
@@ -111,8 +116,23 @@ export default class Play extends Phaser.Scene {
 
     // Handle launch
     if (ball.state === BALL_STATE.ON_PADDLE && Phaser.Input.Keyboard.JustDown(launch)) {
-      this.ball.body.setVelocity(-75, -300);
-      this.ball.state = BALL_STATE.BOUNCING;
+      ball.body.setVelocity(-75, -300);
+      ball.state = BALL_STATE.BOUNCING;
+    }
+    // Handle Fireball Power
+    else if (ball.state === BALL_STATE.BOUNCING && !ball.cooldown && Phaser.Input.Keyboard.JustDown(launch)) {
+      ball.power = 'flame';
+      ball.setFillStyle(0xff0000);
+      const flameDuration = function() {
+        this.power = null;
+        this.fireTrail.on = false;
+        this.cooldown = true;
+        this.setFillStyle(0x0000ff);
+        const endCooldown = function() { this.cooldown = false; this.setFillStyle(0xffffff) };
+        this.scene.time.delayedCall(3000, endCooldown, null, this);
+      };
+      this.time.delayedCall(3000, flameDuration, null, ball);
+      ball.fireTrail.on = !ball.fireTrail.on;
     }
 
     // Handle pause
@@ -149,6 +169,14 @@ export default class Play extends Phaser.Scene {
     for (const hue in HUES) {
       this.createBrickTexture(hue);
     }
+  }
+
+  initializeBallGraphics() {
+    const g = this.add.graphics();
+    g.fillStyle(0x000000);
+    g.fillCircle(15, 15, 15);
+    g.generateTexture('ball', 30, 30);
+    g.destroy();
   }
 
   createInstructions() {
@@ -222,12 +250,19 @@ export default class Play extends Phaser.Scene {
       brick.destroy();
     }
 
+    function fireballCheck(ball, brick) {
+      if (ball.power === 'flame') {
+        brick.destroy();
+        return false;
+      }
+    }
+
     // Look into adding a physics group for this (this.physics.add.group) // TODO
     for (let row = 1; row < 5; row++) {
       for (let col = 1; col < 9; col++) {
         texture = chosenHues[row] + 'Brick';
         const brick = this.physics.add.staticImage(280 + 80*col, 100 + 40*row, texture);
-        this.physics.add.collider(this.ball, brick, destroyBrick);
+        this.physics.add.collider(this.ball, brick, destroyBrick, fireballCheck);
       }
     }
   }
