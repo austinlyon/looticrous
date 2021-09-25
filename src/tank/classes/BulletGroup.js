@@ -51,8 +51,8 @@ export default class BulletGroup extends Phaser.Physics.Arcade.Group {
   fireBullet (x, y) {
     let bullet = this.getFirstDead(false);
     if (bullet) {
-      bullet.rotation = this.scene.tankCannon.rotation;
-      bullet.fire(x, y, this.scene.tankCannon.rotation)
+      bullet.rotation = this.scene.tank.cannon.rotation;
+      bullet.fire(x, y, this.scene.tank.cannon.rotation)
     }
   }
 }
