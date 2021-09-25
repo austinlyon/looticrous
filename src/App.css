@@ -84,7 +84,7 @@ nav ul li#ltc_logo {
   /* width: 1280px;
   height: 720px; */
   margin: 0 auto;
-  background-color: black;
+  /* background-color: black; */
 }
 .phaserGame canvas {
   height: 100%;

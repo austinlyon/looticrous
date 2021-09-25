@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import BombGroup from 'tank/classes/Bomb.js';
 
 export default class Enemy extends Phaser.Physics.Arcade.Sprite {
   constructor(scene) {
@@ -17,6 +18,15 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
     const endY = Phaser.Math.Between(150, 350);
     this.createPath(startX, endY);
 
+    // Create bombs
+    this.bombs = new BombGroup(scene);
+    this.bombTimer = scene.time.addEvent({
+      delay: 2500,                // ms
+      callback: this.dropBomb,
+      callbackScope: this,
+      loop: false,
+    });
+
     this.health = 100;
   }
 
@@ -27,12 +37,17 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
   takeDamage(dmg) {
     this.health -= dmg;
     if (this.health <= 0) {
+      this.bombTimer.remove();
       this.destroy();
     }
     else {
       this.tint = 0xff0000;
       this.scene.time.delayedCall(100, this.resetTint, [], this);
     }
+  }
+
+  dropBomb() {
+    this.bombs.dropBomb(this.x, this.y, this);
   }
 
   createPath(startX, endY) {
@@ -55,6 +70,7 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.path.getPoint(this.follower.t, this.follower.vec);
     this.setPosition(this.follower.vec.x, this.follower.vec.y);
     if (this.x <= -50) {
+      this.bombTimer.remove();
       this.destroy();
     }
   }

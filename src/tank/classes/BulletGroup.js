@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-const SPEED = 600;
+const SPEED = 700;
 
 class Bullet extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {

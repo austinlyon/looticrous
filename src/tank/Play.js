@@ -39,6 +39,7 @@ export default class Play extends Phaser.Scene {
     this.load.image('shitty-ground', 'tank/images/shitty-ground.png');
     this.load.image('green-bullet', 'tank/images/Green_Bullet.png');
     this.load.image('muzzle-flash', 'tank/images/m_11_ghost.png');
+    this.load.image('red-missile', 'tank/images/red_missile.png');
   }
 
   create() {
@@ -48,7 +49,7 @@ export default class Play extends Phaser.Scene {
 
     // Add repeating background trees and ground
     this.bg = this.add
-      .tileSprite(0, 0, 1280, 620, 'tree-background')
+      .tileSprite(0, 0, 1280, 625, 'tree-background')
       .setOrigin(0, 0);
     this.floor = this.add
       .tileSprite(0, 620, 1280, 100, 'shitty-ground')
