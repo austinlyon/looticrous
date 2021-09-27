@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import Phaser from 'phaser';
 import Play from 'tank/Play.js';
-import TankBuilder from 'tank/TankBuilder.js';
+// import TankBuilder from 'tank/TankBuilder.js';
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
@@ -11,7 +11,7 @@ const config = {
   parent: 'phaserGame',
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
-  pixelArt: true,
+  pixelArt: false,
   physics: {
     default: 'arcade',
     arcade: {

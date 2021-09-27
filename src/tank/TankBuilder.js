@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import Tank from 'tank/classes/Tank.js';
+import TankFactory from 'tank/classes/Tank.js';
 
 export default class TankBuilder extends Phaser.Scene {
   constructor() {
@@ -7,6 +7,8 @@ export default class TankBuilder extends Phaser.Scene {
   }
 
   preload() {
+    TankFactory.register();
+
     this.load.atlasXML(
       'tanks',
       'tank/images/tanks_spritesheetDefault.png',
@@ -19,7 +21,7 @@ export default class TankBuilder extends Phaser.Scene {
     this.physics.add.existing(tankImage);
     tankImage.body.setCollideWorldBounds(true);
     console.dir(tankImage);
-    // const newTank = new Tank(this, 200, 100);
+    
     const tankContainer = this.add.tank(300, 100);
     console.dir(tankContainer);
   }

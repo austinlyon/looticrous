@@ -36,7 +36,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
 export default class BulletGroup extends Phaser.Physics.Arcade.Group {
   constructor(scene) {
     super(scene.physics.world, scene, { allowGravity: false });
-    this.scene = scene;
+    // this.scene = scene;
 
     this.createMultiple({
       frameQuantity: 50,
@@ -49,7 +49,7 @@ export default class BulletGroup extends Phaser.Physics.Arcade.Group {
   }
 
   fireBullet (x, y) {
-    let bullet = this.getFirstDead(false);
+    const bullet = this.getFirstDead(false);
     if (bullet) {
       bullet.rotation = this.scene.tank.cannon.rotation;
       bullet.fire(x, y, this.scene.tank.cannon.rotation)

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-const SPEED = 700;
+// const SPEED = 700;
 
 class Bomb extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
@@ -53,7 +53,6 @@ export default class BombGroup extends Phaser.Physics.Arcade.Group {
     let bomb = this.getFirstDead(false);
     if (bomb) {
       // bomb.rotation = this.scene.tank.cannon.rotation;
-      console.dir(enemy);
       const velocityX = (enemy.body.x - enemy.body.prev.x)*60;
       bomb.drop(x, y, velocityX)
     }

@@ -9,7 +9,17 @@ HULL.offset = getComponentOffset(HULL, TANK);
 TRACKS.offset = getComponentOffset(TRACKS, TANK);
 CANNON.offset = getComponentOffset(CANNON, TANK);
 
-export default class Tank extends Phaser.GameObjects.Container {
+const TankFactory = {
+  register: function() {
+    // Make 'tank' available through GameObject Factory (scene.add.tank(x, y))
+    Phaser.GameObjects.GameObjectFactory.register('tank', function (x, y) {
+      return this.displayList.add(new Tank(this.scene, x, y));
+    });
+  }
+};
+export default TankFactory;
+
+class Tank extends Phaser.GameObjects.Container {
   constructor(scene, x, y = TANK.height/2) {
     super(scene, x, y);
     this.scene = scene;
@@ -75,11 +85,6 @@ export default class Tank extends Phaser.GameObjects.Container {
     else                               this.cannon.rotation = cannonAngle;
   }
 }
-
-// Make 'tank' available through GameObject Factory (scene.add.tank(x, y))
-Phaser.GameObjects.GameObjectFactory.register('tank', function (x, y) {
-  return this.displayList.add(new Tank(this.scene, x, y));
-});
 
 function getBoundingBoxDimensions(components) {
   const b = components.reduce( (acc, cur) => {

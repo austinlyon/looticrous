@@ -1,20 +1,15 @@
 import Phaser from 'phaser';
+import TankFactory from 'tank/classes/Tank.js';
 import BulletGroup from 'tank/classes/BulletGroup.js';
 import MuzzleFlash from 'tank/classes/MuzzleFlash.js';
-import Enemy from 'tank/classes/Enemy.js';
+// import Enemy from 'tank/classes/Enemy.js';
+import Bombers from 'tank/classes/enemies/Bomber.js';
+import Stage_1 from 'tank/stages/Stage_1.js';
 
 const STATE = {
   PAUSED: 0,
   PLAYING: 1,
 };
-
-// const C = {  // PENDING DELETION
-//   TANK_WIDTH: 82,
-//   TANK_HEIGHT: 60,
-//   CANNON_X_OFFSET: 10,
-//   CANNON_Y_OFFSET: -18,
-//   WHEEL_Y_OFFSET: 18,
-// };
 
 export default class Play extends Phaser.Scene {
   constructor() {
@@ -25,18 +20,34 @@ export default class Play extends Phaser.Scene {
   }
 
   preload() {
+    // Register extended classes to GameObjectFacotry
+    TankFactory.register();
+
+    // Backgrounds
+    this.load.image('desert_1', 'tank/images/bg/desert_1_720.png');
+    this.load.image('desert_2', 'tank/images/bg/desert_2_720.png');
+    this.load.image('desert_3', 'tank/images/bg/desert_3_720.png');
+    this.load.image('desert_4', 'tank/images/bg/desert_4_720.png');
+    this.load.image('desert_5', 'tank/images/bg/desert_5_720.png');
+    this.load.image('tree-background', 'tank/images/bg/trees looped-0.5.png');
+    this.load.image('shitty-ground', 'tank/images/bg/shitty-ground.png');
+
+    // TankShip
     this.load.atlasXML(
       'tanks',
       'tank/images/tanks_spritesheetDefault.png',
       'tank/images/tanks_spritesheetDefault.xml'
     );
+
+    // Enemies
     this.load.atlasXML(
       'ships',
       'tank/images/spaceShooter2_spritesheet.png',
       'tank/images/spaceShooter2_spritesheet.xml'
     );
-    this.load.image('tree-background', 'tank/images/trees looped-0.5.png');
-    this.load.image('shitty-ground', 'tank/images/shitty-ground.png');
+    this.load.image('blue_bomber', 'tank/images/blue_bomber.png');
+
+    // Weapons
     this.load.image('green-bullet', 'tank/images/Green_Bullet.png');
     this.load.image('muzzle-flash', 'tank/images/m_11_ghost.png');
     this.load.image('red-missile', 'tank/images/red_missile.png');
@@ -47,13 +58,9 @@ export default class Play extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, 1280, 640);
     this.physics.world.drawDebug = false;
 
-    // Add repeating background trees and ground
-    this.bg = this.add
-      .tileSprite(0, 0, 1280, 625, 'tree-background')
-      .setOrigin(0, 0);
-    this.floor = this.add
-      .tileSprite(0, 620, 1280, 100, 'shitty-ground')
-      .setOrigin(0, 0);
+    // Add parallax background and ground layer
+    this.stage = new Stage_1(this);
+    this.stage.createBackground();
 
     // Add the tank
     this.tank = this.add.tank(-60, 0);
@@ -64,43 +71,50 @@ export default class Play extends Phaser.Scene {
       jump: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
     };
 
-    // Add enemies that drop in on timers
-    this.time.addEvent({
-      delay: 2000,                // ms
-      callback: spawnEnemy,
-      //args: [],
-      callbackScope: this,
-      loop: true,
-    });
-    function spawnEnemy() {
-      if (!this.enemy || !this.enemy.active) {
-        this.enemy = new Enemy(this);
-        // Create collider for bullets and enemy ships
-        this.physics.add.collider(this.enemy, this.bullets, bulletHitsEnemy, null, this);
-      }
-    }
-
     // Create bullet group
     this.bullets = new BulletGroup(this);
 
-    // function resetTint(enemy) {
-    //   enemy.tint = 0xffffff;
-    // }
+    // Add enemies that drop in on timers
+    this.bombers = new Bombers(this);
+    this.physics.add.collider(this.bombers, this.bullets, bulletHitsEnemy, null, this);
+    this.physics.add.collider(this.tank, this.bombers.bombs, bombHitsTank, null, this);
+    this.time.addEvent({
+      delay: 2000,                // ms
+      callback: this.bombers.deploy,
+      //args: [],
+      callbackScope: this.bombers,
+      loop: true,
+    });
+
     function bulletHitsEnemy(enemy, bullet) {
       bullet.recycle();
-      // enemy.tint = 0xff0000;
-      // this.time.delayedCall(100, resetTint, [this.enemy], this);
       enemy.takeDamage(20);
     }
 
+    function bombHitsTank(tank, bomb) {
+      bomb.recycle();
+    }
+
     // Create debug controls
-    this.toggleDebug = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+    this.togglePhysicsDebugInput = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+    this.toggleDebugTextInput = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ZERO);
+
+    // Create debug text area
+    this.debugText = this.add.text(10, 10, 'DebugInfo',
+      { font: '16px Courier', fill: '#ffffff' })
+      .setDepth(10);
+    this.debugGraphic = this.add.rectangle(
+      0, 0,
+      100, 100,
+      0x000000, 0.5
+    )
+      .setOrigin(0, 0)
+      .setDepth(9);
   }
 
   update(t, dt) {
-    // Parallax the background and floor
-    this.bg.tilePositionX -= -1.3;
-    this.floor.tilePositionX -= -2.6;
+    // Parallax the background and ground
+    this.stage.updateBackground();
 
     // Call GameObject Updates
     if (this.tank) this.tank.update();
@@ -126,7 +140,7 @@ export default class Play extends Phaser.Scene {
     }
 
     // Handle toggle debug
-    if (Phaser.Input.Keyboard.JustDown(this.toggleDebug)) {
+    if (Phaser.Input.Keyboard.JustDown(this.togglePhysicsDebugInput)) {
       if (this.physics.world.drawDebug) {
         this.physics.world.drawDebug = false;
         this.physics.world.debugGraphic.clear();
@@ -134,6 +148,32 @@ export default class Play extends Phaser.Scene {
       else {
         this.physics.world.drawDebug = true;
       }
+    }
+
+    // Handle update to debug text
+    this.debugText.setText([
+      'Total: ' + this.bombers.getLength(),
+      'Max: ' + this.bombers.maxSize,
+      'Active: ' + this.bombers.countActive(true),
+      'Inactive: ' + this.bombers.countActive(false),
+      'Used: ' + this.bombers.getTotalUsed(),
+      'Free: ' + this.bombers.getTotalFree(),
+
+      // 'enemy body x: ' + (this.enemy ? Math.ceil(this.enemy.body.x) : '-'),
+      // 'enemy body y: ' + (this.enemy ? Math.ceil(this.enemy.body.y) : '-'),
+    ]);
+    this.debugGraphic.setSize(this.debugText.width+20, this.debugText.height+20);
+    if (Phaser.Input.Keyboard.JustDown(this.toggleDebugTextInput)) {
+      this.toggleDebugText();
+    }
+  }
+
+  toggleDebugText() {
+    if (this.debugText && this.debugGraphic) {
+      this.debugText.setActive(!this.debugText.active);
+      this.debugText.setVisible(!this.debugText.visible);
+      this.debugGraphic.setActive(!this.debugGraphic.active);
+      this.debugGraphic.setVisible(!this.debugGraphic.visible);
     }
   }
 }
