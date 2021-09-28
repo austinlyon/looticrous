@@ -41,14 +41,10 @@ class Bomber extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
     super(scene, 0, 0, 'blue_bomber');
     this.setFlipX(true);
-
-    // Initialize health
-    this.health = 100;
-    this.startBombTimer();
   }
 
   dropBomb() {
-    this.bombs.dropBomb(this.x, this.y, this);
+    this.bombs.drop(this.x, this.y, this);
   }
 
   startBombTimer() {

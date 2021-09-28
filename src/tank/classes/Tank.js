@@ -46,6 +46,10 @@ class Tank extends Phaser.GameObjects.Container {
       scene.input.activePointer.x - (this.x + this.cannon.x),
       scene.input.activePointer.y - (this.y + this.cannon.y)
     );
+
+    // Initialize health
+    this.maxHealth = 100;
+    this.health = this.maxHealth;
   }
 
   update(t, dt) {
@@ -83,6 +87,17 @@ class Tank extends Phaser.GameObjects.Container {
     if      (cannonAngle <= Math.PI/2) this.cannon.rotation = 0;
     else if (cannonAngle <= Math.PI)   this.cannon.rotation = Math.PI;
     else                               this.cannon.rotation = cannonAngle;
+  }
+
+  takeDamage(dmg) {
+    this.health -= dmg;
+    if (this.health <= 0) {
+      console.log("You're dead!");
+    }
+    else {
+      this.tint = 0xff0000;
+      this.scene.time.delayedCall(100, this.resetTint, [], this);
+    }
   }
 }
 

@@ -81,7 +81,6 @@ export default class Play extends Phaser.Scene {
     this.time.addEvent({
       delay: 2000,                // ms
       callback: this.bombers.deploy,
-      //args: [],
       callbackScope: this.bombers,
       loop: true,
     });
@@ -95,11 +94,22 @@ export default class Play extends Phaser.Scene {
       bomb.recycle();
     }
 
+    // World Bounds collision handler
+    this.physics.world.on('worldbounds', handleWorldBoundsCollision);
+    function handleWorldBoundsCollision(body) {
+      if (body.gameObject.constructor.name === 'Bomb') {
+        body.onWorldBounds = false;
+        body.gameObject.recycle();
+      }
+    }
+
     // Create debug controls
     this.togglePhysicsDebugInput = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
     this.toggleDebugTextInput = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ZERO);
 
     // Create debug text area
+    this.debugGroup = this.bombers.bombs;
+    this.debugGroupName = 'Bomber Bombs';
     this.debugText = this.add.text(10, 10, 'DebugInfo',
       { font: '16px Courier', fill: '#ffffff' })
       .setDepth(10);
@@ -152,12 +162,13 @@ export default class Play extends Phaser.Scene {
 
     // Handle update to debug text
     this.debugText.setText([
-      'Total: ' + this.bombers.getLength(),
-      'Max: ' + this.bombers.maxSize,
-      'Active: ' + this.bombers.countActive(true),
-      'Inactive: ' + this.bombers.countActive(false),
-      'Used: ' + this.bombers.getTotalUsed(),
-      'Free: ' + this.bombers.getTotalFree(),
+      this.debugGroupName,
+      'Total: ' + this.debugGroup.getLength(),
+      'Max: ' + this.debugGroup.maxSize,
+      'Active: ' + this.debugGroup.countActive(true),
+      'Inactive: ' + this.debugGroup.countActive(false),
+      'Used: ' + this.debugGroup.getTotalUsed(),
+      'Free: ' + this.debugGroup.getTotalFree(),
 
       // 'enemy body x: ' + (this.enemy ? Math.ceil(this.enemy.body.x) : '-'),
       // 'enemy body y: ' + (this.enemy ? Math.ceil(this.enemy.body.y) : '-'),
