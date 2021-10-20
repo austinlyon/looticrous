@@ -55,6 +55,7 @@ class Tank extends Phaser.GameObjects.Container {
   update(t, dt) {
     this.handleMovement();
     this.handleCannonRotation();
+    this.handleGamepadInput();
   }
 
   // Expects config object with properties left, right, jump
@@ -78,6 +79,23 @@ class Tank extends Phaser.GameObjects.Container {
       this.body.velocity.y = -400;
   }
 
+  handleGamepadInput() {
+    const gamepad = this.gamepad;
+    if (gamepad) {
+      if (gamepad.left) {
+        this.body.velocity.x = -400;
+      }
+      else if (gamepad.right) {
+        this.body.velocity.x = 400;
+      }
+
+      const cannonAngle = gamepad.rightStick.angle();
+      if      (cannonAngle <= Math.PI/2) this.cannon.rotation = 0;
+      else if (cannonAngle <= Math.PI)   this.cannon.rotation = Math.PI;
+      else                               this.cannon.rotation = cannonAngle;
+    }
+  }
+
   handleCannonRotation() {
     this.projectileVector.set(
       this.scene.input.activePointer.x - (this.x + this.cannon.x),
@@ -87,6 +105,26 @@ class Tank extends Phaser.GameObjects.Container {
     if      (cannonAngle <= Math.PI/2) this.cannon.rotation = 0;
     else if (cannonAngle <= Math.PI)   this.cannon.rotation = Math.PI;
     else                               this.cannon.rotation = cannonAngle;
+  }
+
+  handleCannonRay(ray, lineGraphic, runIt, debugText) {
+    ray.setOrigin(this.x + this.cannon.x, this.y + this.cannon.y);
+    ray.setAngle(this.cannon.rotation);
+    const intersection = ray.cast();
+    lineGraphic.clear();
+    lineGraphic.lineBetween(
+      this.x + this.cannon.x,
+      this.y + this.cannon.y,
+      intersection.x,
+      intersection.y
+    );
+    lineGraphic.setDepth(10);
+    debugText.setText([
+      intersection.x,
+      intersection.y,
+      intersection.object,
+      intersection.segment,
+    ]);
   }
 
   takeDamage(dmg) {

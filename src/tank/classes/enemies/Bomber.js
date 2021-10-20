@@ -9,8 +9,10 @@ export default class Bombers extends Phaser.Physics.Arcade.Group {
       allowGravity: false,
       immovable: true,
       velocityX: -200,
+      runChildUpdate: true,
     };
     super(scene.physics.world, scene, config);
+    scene.add.existing(this);
 
     // Create bombs - this enemy's weapon type
     this.bombs = new BombGroup(this.scene);
@@ -41,6 +43,10 @@ class Bomber extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
     super(scene, 0, 0, 'blue_bomber');
     this.setFlipX(true);
+    this.setDepth(8);
+    this.debugText = scene.add.text(0, 0, 'bomberInfo',
+      { font: '16px Courier', fill: '#ffffff' })
+      .setDepth(10);
   }
 
   dropBomb() {
@@ -83,9 +89,17 @@ class Bomber extends Phaser.Physics.Arcade.Sprite {
     if (
       this.y <= -this.height ||
       this.x <= -this.width ||
-      this.x >= this.scene.width + this.width
+      this.x >= this.scene.sys.scale.width + this.width
     ) {
       this.recycle();
     }
+  }
+
+  update(t, dt) {
+    // Phaser.Display.Align.To.BottomCenter(this.debugText, this.body);
+    this.debugText.setPosition(this.body.x, this.body.y);
+    this.debugText.setText([
+      'Depth: ' + this.depth,
+    ]);
   }
 }

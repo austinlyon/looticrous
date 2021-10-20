@@ -5,7 +5,6 @@ const SPEED = 700;
 class Bullet extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
     super(scene, x, y, 'green-bullet');
-    // super(scene, x, y, 'tanks', 'tank_bullet1.png');
     this.scene = scene;
     this.maxDimension = Math.max(this.width, this.height);
   }

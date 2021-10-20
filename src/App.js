@@ -45,7 +45,7 @@ function App() {
             <li className = {selectedTab === 'tanks' ? 'selectedTab' : ''}>
               <Link to="/tanks">
                 <NavItem
-                  text='ADA Tanks'
+                  text='TankShip'
                   id = 'tanksTab'
                   clickHandler = {selectTab} />
               </Link>
