@@ -44,9 +44,9 @@ class Bomber extends Phaser.Physics.Arcade.Sprite {
     super(scene, 0, 0, 'blue_bomber');
     this.setFlipX(true);
     this.setDepth(8);
-    this.debugText = scene.add.text(0, 0, 'bomberInfo',
-      { font: '16px Courier', fill: '#ffffff' })
-      .setDepth(10);
+    // this.debugText = scene.add.text(0, 0, 'bomberInfo',
+      // { font: '16px Courier', fill: '#ffffff' })
+      // .setDepth(10);
   }
 
   dropBomb() {
@@ -97,9 +97,9 @@ class Bomber extends Phaser.Physics.Arcade.Sprite {
 
   update(t, dt) {
     // Phaser.Display.Align.To.BottomCenter(this.debugText, this.body);
-    this.debugText.setPosition(this.body.x, this.body.y);
-    this.debugText.setText([
-      'Depth: ' + this.depth,
-    ]);
+    // this.debugText.setPosition(this.body.x, this.body.y);
+    // this.debugText.setText([
+    //   'Depth: ' + this.depth,
+    // ]);
   }
 }

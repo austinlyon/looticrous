@@ -2,8 +2,6 @@ import Phaser from 'phaser';
 // import { Pane } from 'tweakpane';
 import Pause from 'tank/scenes/Pause.js';
 import TankFactory from 'tank/classes/Tank.js';
-import BulletGroup from 'tank/classes/BulletGroup.js';
-import MuzzleFlash from 'tank/classes/MuzzleFlash.js';
 import Bombers from 'tank/classes/enemies/Bomber.js';
 import Stage_1 from 'tank/stages/Stage_1.js';
 
@@ -16,17 +14,6 @@ export default class Play extends Phaser.Scene {
   constructor() {
     super('play');
     this.state = STATE.PLAYING;
-    this.cooldown = 0;
-  }
-
-  _onBlur() {
-    // console.log('game blur');
-    this.game.input.keyboard.enabled = false;
-  }
-
-  _onFocus() {
-    // console.log('game focus');
-    this.game.input.keyboard.enabled = true;
   }
 
   preload() {
@@ -63,6 +50,7 @@ export default class Play extends Phaser.Scene {
     // Weapons
     this.load.image('green-bullet', 'tank/images/Green_Bullet.png');
     this.load.image('muzzle-flash', 'tank/images/m_11_ghost.png');
+    this.load.image('blue-beam', 'tank/images/blue_beam.png');
     this.load.image('red-missile', 'tank/images/red_missile.png');
     this.load.spritesheet(
       'small_explosion', 'tank/images/small_explosion.png',
@@ -72,11 +60,6 @@ export default class Play extends Phaser.Scene {
 
   create() {
     window.scene = this;
-
-    // An attempt at handling capturing of keyboard controls
-    // this.game.canvas.setAttribute('tabindex', 0);
-    // this.game.events.addListener(Phaser.Core.Events.BLUR, this._onBlur, this);
-    // this.game.events.addListener(Phaser.Core.Events.FOCUS, this._onFocus, this);
 
     // Instantiate raycaster
     this.raycaster = this.raycasterPlugin.createRaycaster();
@@ -114,14 +97,13 @@ export default class Play extends Phaser.Scene {
       console.log(pad);
     }, this);
 
-    // Create bullet group
-    this.bullets = new BulletGroup(this);
-
-    // Add enemies that drop in on timers
+    // Add enemies groups
     this.bombers = new Bombers(this);
-    this.physics.add.overlap(this.bombers, this.bullets, bulletHitsEnemy, null, this);
-    this.physics.add.overlap(this.tank, this.bombers.bombs, bombHitsTank, null, this);
-    this.physics.add.overlap(this.bullets, this.bombers.bombs, bulletHitsBomb, null, this);
+    this.enemies = [
+      this.bombers,
+    ];
+
+    // Begin level's enemy timeline
     this.time.addEvent({
       delay: 2000,
       callback: this.bombers.deploy,
@@ -129,18 +111,18 @@ export default class Play extends Phaser.Scene {
       loop: true,
     });
 
-    function bulletHitsEnemy(enemy, bullet) {
-      bullet.recycle();
-      enemy.takeDamage(20);
+    // Create colliders / overlaps for tankship weapons vs enemy groups
+    for (const enemy of this.enemies) {
+      for (const weapon in this.tank.weapons) {
+        if (this.tank.weapons[weapon].type === 'projectile')
+          this.tank.weapons[weapon].addCollider(enemy);
+      }
     }
 
+    // Create colliders / overlaps for enemy weapons vs tankship
+    this.physics.add.overlap(this.tank, this.bombers.bombs, bombHitsTank, null, this);
     function bombHitsTank(tank, bomb) {
       bomb.explode('tank');
-    }
-
-    function bulletHitsBomb(bullet, bomb) {
-      bullet.recycle();
-      bomb.explode('bullet');
     }
 
     // World Bounds collision handler
@@ -152,11 +134,24 @@ export default class Play extends Phaser.Scene {
       }
     }
 
+    // Create switch weapon controls
+    this.switchWeapon = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+
     // Create Pause Controls
     this.pauseInput = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
 
     // Create Fullscreen Controls
     this.fullscreenInput = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKTICK);
+    this.fullscreenInput.on('up', function() {
+      if (this.scale.isFullscreen) {
+        console.log('Leaving Fullscreen!');
+        this.scale.stopFullscreen();
+      }
+      else {
+        console.log('Entering Fullscreen!');
+        this.scale.startFullscreen();
+      }
+    }, this);
 
     // Create debug controls
     this.togglePhysicsDebugInput =
@@ -184,43 +179,18 @@ export default class Play extends Phaser.Scene {
     this.stage.updateBackground();
 
     // Call GameObject Updates
-    if (this.tank) this.tank.update();
-    if (this.enemy) this.enemy.update();
+    if (this.tank) this.tank.update(t, dt);
     this.raycaster.mapGameObjects(this.bombers.getChildren(), true);
-    if (this.tank) this.tank.handleCannonRay(this.ray, this.lineGraphic, this.runIt, this.debugText);
-
-    // Make cannon fire bullet
-    if (
-      this.input.activePointer.isDown &&
-      this.input.activePointer.x > 0 &&
-      this.input.activePointer.x < this.sys.scale.width &&
-      this.input.activePointer.y > 0 &&
-      this.input.activePointer.y < this.sys.scale.height
-    ) {
-      if (this.cooldown <= 0) {
-        const bulletFirePos = new Phaser.Math.Vector2()
-          .setToPolar(this.tank.cannon.rotation, this.tank.cannon.width)
-          .add(this.tank).add(this.tank.cannon);
-
-        this.bullets.fireBullet(bulletFirePos.x, bulletFirePos.y);
-        new MuzzleFlash(this, bulletFirePos.x, bulletFirePos.y, this.tank);
-        this.cooldown = 200;
-      }
-    }
-
-    // Handle bullet cooldown
-    if (this.cooldown > 0) {
-      this.cooldown -= dt;
-      if (this.cooldown < 0) this.cooldown = 0;
-    }
 
     // Handle toggle fullscreen
-    if (Phaser.Input.Keyboard.JustDown(this.fullscreenInput)) {
-      if (this.scale.isFullscreen)
-        this.scale.stopFullscreen();
-      else
-        this.scale.startFullscreen();
-    }
+    // if (Phaser.Input.Keyboard.JustDown(this.fullscreenInput)) {
+    //   if (this.scale.isFullscreen){
+    //   console.log('Leaving Fullscreen!');
+    //     this.scale.stopFullscreen();}
+    //   else{
+    //     console.log('Entering Fullscreen!');
+    //     this.scale.startFullscreen();}
+    // }
 
     // Handle pause
     if (Phaser.Input.Keyboard.JustDown(this.pauseInput)) {

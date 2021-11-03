@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import Blaster from 'tank/classes/weapons/Blaster.js';
+import Beam from 'tank/classes/weapons/Beam.js';
 
 // Constants & Calculated Values
 const HULL =   { x:  0, y:    0, width: 82, height: 48 };  // body2
@@ -22,7 +24,6 @@ export default TankFactory;
 class Tank extends Phaser.GameObjects.Container {
   constructor(scene, x, y = TANK.height/2) {
     super(scene, x, y);
-    this.scene = scene;
 
     // Add tank components
     this.cannon = scene.add
@@ -50,12 +51,20 @@ class Tank extends Phaser.GameObjects.Container {
     // Initialize health
     this.maxHealth = 100;
     this.health = this.maxHealth;
+
+    // Add weapons
+    this.weapons = {
+      blaster: new Blaster(scene, this),
+      beam: new Beam(scene, scene.raycaster, scene.enemies, this),
+    };
+    this.activeWeapon = 'beam';
   }
 
   update(t, dt) {
     this.handleMovement();
     this.handleCannonRotation();
     this.handleGamepadInput();
+    this.handleWeapons(t, dt);
   }
 
   // Expects config object with properties left, right, jump
@@ -107,7 +116,48 @@ class Tank extends Phaser.GameObjects.Container {
     else                               this.cannon.rotation = cannonAngle;
   }
 
-  handleCannonRay(ray, lineGraphic, runIt, debugText) {
+  handleWeapons(t, dt) {
+    // Decrement weapon cooldowns
+    for (const key in this.weapons) {
+      if (this.weapons[key].cooldown > 0) this.weapons[key].cooldown -= dt;
+    }
+    const weapon = this.weapons[this.activeWeapon];
+
+    // Fire weapon if input
+    if (this.scene.input.activePointer.isDown) {
+      const muzzlePos = this.getMuzzlePosition();
+
+      // Projectile weapons only fire off cooldown
+      if (weapon.type === 'projectile' && weapon.cooldown <= 0) {
+        weapon.fire(muzzlePos.x, muzzlePos.y, this.cannon.rotation);
+      }
+      // Beam weapons fire continuously (only do damage off cooldown)
+      else if (weapon.type === 'beam') {
+        weapon.fire(muzzlePos.x, muzzlePos.y, this.cannon.rotation)
+      }
+    }
+    // Clear beam weapon if no input
+    else {
+      if (weapon.type === 'beam') {
+        weapon.beamSprite.setVisible(false);
+      }
+    }
+  }
+
+  getMuzzlePosition () {
+    return new Phaser.Math.Vector2()
+      .setToPolar(this.cannon.rotation, this.cannon.width)
+      .add(this.body.center)
+      .add(this.cannon);
+  }
+
+  getMuzzlePositionRelative () {
+    return new Phaser.Math.Vector2()
+      .setToPolar(this.cannon.rotation, this.cannon.width)
+      .add(this.cannon);
+  }
+
+  handleCannonRay (ray, lineGraphic, runIt, debugText) {
     ray.setOrigin(this.x + this.cannon.x, this.y + this.cannon.y);
     ray.setAngle(this.cannon.rotation);
     const intersection = ray.cast();
@@ -127,7 +177,7 @@ class Tank extends Phaser.GameObjects.Container {
     ]);
   }
 
-  takeDamage(dmg) {
+  takeDamage (dmg) {
     this.health -= dmg;
     if (this.health <= 0) {
       console.log("You're dead!");

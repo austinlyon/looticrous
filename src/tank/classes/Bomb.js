@@ -42,9 +42,13 @@ class Bomb extends Phaser.Physics.Arcade.Sprite {
     this.recycle();
   }
 
+  takeDamage() {
+    this.explode('bullet');
+  }
+
   recycle() {
     this.disableBody(true, true);
-    this.body.reset(-10, -10);
+    this.body.reset(-this.maxDimension, -this.maxDimension);
   }
 
   preUpdate(time, delta){
