@@ -20,7 +20,7 @@ export default class Beam {
   }
 
   fire (x, y, rotation) {
-    const { scene, raycaster, ray, rayGraphic } = this;
+    const { scene, raycaster, ray } = this;
     const enemies = scene.enemies;
 
     // Map any new enemies added to the scene to the raycaster
